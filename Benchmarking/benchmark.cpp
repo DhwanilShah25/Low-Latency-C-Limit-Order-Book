@@ -58,7 +58,7 @@ static void BM_AddLimitOrders_Scaling(benchmark::State& state) {
 }
 
 BENCHMARK(BM_AddLimitOrders_Scaling)
-    ->RangeMultiplier(2)->Range(256, 256 << 9) 
+    ->RangeMultiplier(2)->Range(2048, 2048 << 6) 
     ->Unit(benchmark::kNanosecond)
     ->ComputeStatistics("p99", p99_stat)
     ->ComputeStatistics("p99.9", p999_stat)

@@ -72,6 +72,17 @@ public:
     void printOrder(ID orderId) const;
     void printOrderBook() const;
 
+    // Getters
+    Price getBestBid() const {
+        int32_t p = bids.get_first();
+        return (p == -1) ? 0 : static_cast<Price>(p);
+    }
+    
+    Price getBestAsk() const {
+        int32_t p = asks.get_first();
+        return (p == -1) ? 0 : static_cast<Price>(p);
+    }
+
     // reset
     void reset();
 };

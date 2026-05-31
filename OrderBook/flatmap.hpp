@@ -35,17 +35,38 @@ public:
     int32_t min_price = MAX_PRICE;
     int32_t max_price = -1;
 
+    // inline void set_bit(Price p) { 
+    //     bitmask[p / 64] |= (1ULL << (p % 64)); 
+    //     if (p < min_price) min_price = p;
+    //     if (p > max_price) max_price = p;
+    // }
+    
+    // inline void clear_bit(Price p) { 
+    //     bitmask[p / 64] &= ~(1ULL << (p % 64)); 
+    //     // If we delete the very edge of the book, scan once to find the new edge
+    //     if (p == min_price) min_price = scan_up(p);
+    //     if (p == max_price) max_price = scan_down(p);
+    //     if (min_price == -1) { min_price = MAX_PRICE; max_price = -1; }
+    // }
+
     inline void set_bit(Price p) { 
         bitmask[p / 64] |= (1ULL << (p % 64)); 
-        if (p < min_price) min_price = p;
-        if (p > max_price) max_price = p;
+        
+        // Force 'p' into a signed integer to prevent the C++ promotion trap!
+        int32_t p_signed = static_cast<int32_t>(p);
+        
+        if (p_signed < min_price) min_price = p_signed;
+        if (p_signed > max_price) max_price = p_signed;
     }
     
     inline void clear_bit(Price p) { 
         bitmask[p / 64] &= ~(1ULL << (p % 64)); 
+        
+        int32_t p_signed = static_cast<int32_t>(p);
+        
         // If we delete the very edge of the book, scan once to find the new edge
-        if (p == min_price) min_price = scan_up(p);
-        if (p == max_price) max_price = scan_down(p);
+        if (p_signed == min_price) min_price = scan_up(p_signed);
+        if (p_signed == max_price) max_price = scan_down(p_signed);
         if (min_price == -1) { min_price = MAX_PRICE; max_price = -1; }
     }
     
