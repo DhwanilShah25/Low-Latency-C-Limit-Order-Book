@@ -57,10 +57,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/Users/dhwanilshah/Documents/Coding/C++ /LOB PoolUpdate copy 2"
+CMAKE_SOURCE_DIR = "/Users/dhwanilshah/Documents/Coding/C++ /Low Latency C++ Limit Order Book"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/Users/dhwanilshah/Documents/Coding/C++ /LOB PoolUpdate copy 2/build"
+CMAKE_BINARY_DIR = "/Users/dhwanilshah/Documents/Coding/C++ /Low Latency C++ Limit Order Book/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/dhwanilshah/Documents/Coding/C++ /LOB PoolUpdate copy 2/build/CMakeFiles" "/Users/dhwanilshah/Documents/Coding/C++ /LOB PoolUpdate copy 2/build//CMakeFiles/progress.marks"
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/dhwanilshah/Documents/Coding/C++ /Low Latency C++ Limit Order Book/build/CMakeFiles" "/Users/dhwanilshah/Documents/Coding/C++ /Low Latency C++ Limit Order Book/build//CMakeFiles/progress.marks"
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/dhwanilshah/Documents/Coding/C++ /LOB PoolUpdate copy 2/build/CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/dhwanilshah/Documents/Coding/C++ /Low Latency C++ Limit Order Book/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -142,134 +142,134 @@ benchmark_engine/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/build
 .PHONY : benchmark_engine/fast
 
-Benchmarking/benchmark.o: Benchmarking/benchmark.cpp.o
-.PHONY : Benchmarking/benchmark.o
+benchmarking/benchmark.o: benchmarking/benchmark.cpp.o
+.PHONY : benchmarking/benchmark.o
 
 # target to build an object file
-Benchmarking/benchmark.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/Benchmarking/benchmark.cpp.o
-.PHONY : Benchmarking/benchmark.cpp.o
+benchmarking/benchmark.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/benchmarking/benchmark.cpp.o
+.PHONY : benchmarking/benchmark.cpp.o
 
-Benchmarking/benchmark.i: Benchmarking/benchmark.cpp.i
-.PHONY : Benchmarking/benchmark.i
+benchmarking/benchmark.i: benchmarking/benchmark.cpp.i
+.PHONY : benchmarking/benchmark.i
 
 # target to preprocess a source file
-Benchmarking/benchmark.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/Benchmarking/benchmark.cpp.i
-.PHONY : Benchmarking/benchmark.cpp.i
+benchmarking/benchmark.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/benchmarking/benchmark.cpp.i
+.PHONY : benchmarking/benchmark.cpp.i
 
-Benchmarking/benchmark.s: Benchmarking/benchmark.cpp.s
-.PHONY : Benchmarking/benchmark.s
+benchmarking/benchmark.s: benchmarking/benchmark.cpp.s
+.PHONY : benchmarking/benchmark.s
 
 # target to generate assembly for a file
-Benchmarking/benchmark.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/Benchmarking/benchmark.cpp.s
-.PHONY : Benchmarking/benchmark.cpp.s
+benchmarking/benchmark.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/benchmarking/benchmark.cpp.s
+.PHONY : benchmarking/benchmark.cpp.s
 
-OrderBook/book.o: OrderBook/book.cpp.o
-.PHONY : OrderBook/book.o
+network/main.o: network/main.cpp.o
+.PHONY : network/main.o
 
 # target to build an object file
-OrderBook/book.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/book.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/book.cpp.o
-.PHONY : OrderBook/book.cpp.o
+network/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/network/main.cpp.o
+.PHONY : network/main.cpp.o
 
-OrderBook/book.i: OrderBook/book.cpp.i
-.PHONY : OrderBook/book.i
+network/main.i: network/main.cpp.i
+.PHONY : network/main.i
 
 # target to preprocess a source file
-OrderBook/book.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/book.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/book.cpp.i
-.PHONY : OrderBook/book.cpp.i
+network/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/network/main.cpp.i
+.PHONY : network/main.cpp.i
 
-OrderBook/book.s: OrderBook/book.cpp.s
-.PHONY : OrderBook/book.s
+network/main.s: network/main.cpp.s
+.PHONY : network/main.s
 
 # target to generate assembly for a file
-OrderBook/book.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/book.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/book.cpp.s
-.PHONY : OrderBook/book.cpp.s
+network/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/network/main.cpp.s
+.PHONY : network/main.cpp.s
 
-OrderBook/limit.o: OrderBook/limit.cpp.o
-.PHONY : OrderBook/limit.o
+orderBook/book.o: orderBook/book.cpp.o
+.PHONY : orderBook/book.o
 
 # target to build an object file
-OrderBook/limit.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/limit.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/limit.cpp.o
-.PHONY : OrderBook/limit.cpp.o
+orderBook/book.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/book.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/book.cpp.o
+.PHONY : orderBook/book.cpp.o
 
-OrderBook/limit.i: OrderBook/limit.cpp.i
-.PHONY : OrderBook/limit.i
+orderBook/book.i: orderBook/book.cpp.i
+.PHONY : orderBook/book.i
 
 # target to preprocess a source file
-OrderBook/limit.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/limit.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/limit.cpp.i
-.PHONY : OrderBook/limit.cpp.i
+orderBook/book.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/book.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/book.cpp.i
+.PHONY : orderBook/book.cpp.i
 
-OrderBook/limit.s: OrderBook/limit.cpp.s
-.PHONY : OrderBook/limit.s
+orderBook/book.s: orderBook/book.cpp.s
+.PHONY : orderBook/book.s
 
 # target to generate assembly for a file
-OrderBook/limit.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/limit.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/limit.cpp.s
-.PHONY : OrderBook/limit.cpp.s
+orderBook/book.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/book.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/book.cpp.s
+.PHONY : orderBook/book.cpp.s
 
-OrderBook/order.o: OrderBook/order.cpp.o
-.PHONY : OrderBook/order.o
+orderBook/limit.o: orderBook/limit.cpp.o
+.PHONY : orderBook/limit.o
 
 # target to build an object file
-OrderBook/order.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/order.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/order.cpp.o
-.PHONY : OrderBook/order.cpp.o
+orderBook/limit.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/limit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/limit.cpp.o
+.PHONY : orderBook/limit.cpp.o
 
-OrderBook/order.i: OrderBook/order.cpp.i
-.PHONY : OrderBook/order.i
+orderBook/limit.i: orderBook/limit.cpp.i
+.PHONY : orderBook/limit.i
 
 # target to preprocess a source file
-OrderBook/order.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/order.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/order.cpp.i
-.PHONY : OrderBook/order.cpp.i
+orderBook/limit.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/limit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/limit.cpp.i
+.PHONY : orderBook/limit.cpp.i
 
-OrderBook/order.s: OrderBook/order.cpp.s
-.PHONY : OrderBook/order.s
+orderBook/limit.s: orderBook/limit.cpp.s
+.PHONY : orderBook/limit.s
 
 # target to generate assembly for a file
-OrderBook/order.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/OrderBook/order.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/OrderBook/order.cpp.s
-.PHONY : OrderBook/order.cpp.s
+orderBook/limit.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/limit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/limit.cpp.s
+.PHONY : orderBook/limit.cpp.s
 
-main.o: main.cpp.o
-.PHONY : main.o
+orderBook/order.o: orderBook/order.cpp.o
+.PHONY : orderBook/order.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/main.cpp.o
-.PHONY : main.cpp.o
+orderBook/order.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/order.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/order.cpp.o
+.PHONY : orderBook/order.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+orderBook/order.i: orderBook/order.cpp.i
+.PHONY : orderBook/order.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/main.cpp.i
-.PHONY : main.cpp.i
+orderBook/order.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/order.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/order.cpp.i
+.PHONY : orderBook/order.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+orderBook/order.s: orderBook/order.cpp.s
+.PHONY : orderBook/order.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/main.cpp.s
-.PHONY : main.cpp.s
+orderBook/order.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/matching_engine.dir/build.make CMakeFiles/matching_engine.dir/orderBook/order.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmark_engine.dir/build.make CMakeFiles/benchmark_engine.dir/orderBook/order.cpp.s
+.PHONY : orderBook/order.cpp.s
 
 # Help Target
 help:
@@ -281,21 +281,21 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... benchmark_engine"
 	@echo "... matching_engine"
-	@echo "... Benchmarking/benchmark.o"
-	@echo "... Benchmarking/benchmark.i"
-	@echo "... Benchmarking/benchmark.s"
-	@echo "... OrderBook/book.o"
-	@echo "... OrderBook/book.i"
-	@echo "... OrderBook/book.s"
-	@echo "... OrderBook/limit.o"
-	@echo "... OrderBook/limit.i"
-	@echo "... OrderBook/limit.s"
-	@echo "... OrderBook/order.o"
-	@echo "... OrderBook/order.i"
-	@echo "... OrderBook/order.s"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... benchmarking/benchmark.o"
+	@echo "... benchmarking/benchmark.i"
+	@echo "... benchmarking/benchmark.s"
+	@echo "... network/main.o"
+	@echo "... network/main.i"
+	@echo "... network/main.s"
+	@echo "... orderBook/book.o"
+	@echo "... orderBook/book.i"
+	@echo "... orderBook/book.s"
+	@echo "... orderBook/limit.o"
+	@echo "... orderBook/limit.i"
+	@echo "... orderBook/limit.s"
+	@echo "... orderBook/order.o"
+	@echo "... orderBook/order.i"
+	@echo "... orderBook/order.s"
 .PHONY : help
 
 

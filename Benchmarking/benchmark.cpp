@@ -2,6 +2,7 @@
 #include "book.hpp" // CMake knows to look in OrderBook/
 #include <vector>
 #include <algorithm>
+#include <random>
 
 // ─────────────────────────────────────────────
 // Statistics Helpers (Added P99.9 for HFT safety)
@@ -153,10 +154,65 @@ static void BM_MarketMakerChurn(benchmark::State& state) {
     // Processed 40 operations (20 adds, 19 cancels, 1 market execution)
     state.SetItemsProcessed(state.iterations() * 40);
 }
+
 BENCHMARK(BM_MarketMakerChurn)
     ->Unit(benchmark::kNanosecond)
     ->ComputeStatistics("p99", p99_stat)
     ->ComputeStatistics("p99.9", p999_stat)
+    ->ComputeStatistics("median", median_stat)
+    ->DisplayAggregatesOnly(true);
+
+
+// ─────────────────────────────────────────────
+// 5. Worst-Case Cache Miss Profile (Random Memory Jumps)
+// ─────────────────────────────────────────────
+// Forces the CPU to jump wildly across the FlatMap's 8MB memory block, 
+// causing intentional L1/L2 cache misses to find the true worst-case latency.
+static void BM_WorstCaseCacheMiss(benchmark::State& state) {
+    const int numOrders = state.range(0);
+
+    // 1. Pre-generate data OUTSIDE the timed loop!
+    std::vector<Price> bid_prices(numOrders);
+    std::vector<Price> ask_prices(numOrders);
+    
+    std::mt19937 rng(1337); 
+    // Strictly segregate Bids and Asks so they NEVER match (we only want to test insertion jumping)
+    std::uniform_int_distribution<Price> bid_dist(1, 49000); 
+    std::uniform_int_distribution<Price> ask_dist(51000, 100000); 
+
+    for (int i = 0; i < numOrders; ++i) {
+        bid_prices[i] = bid_dist(rng);
+        ask_prices[i] = ask_dist(rng);
+    }
+
+    // 2. The Timed Benchmark Loop
+    for (auto _ : state) {
+        state.PauseTiming();
+        Book book; // Re-instantiate a clean book
+        state.ResumeTiming();
+
+        // 3. Blast the pre-computed random orders
+        for (int i = 0; i < numOrders; ++i) {
+            OrderSide side = (i % 2 == 0) ? OrderSide::Buy : OrderSide::Sell;
+            Price price = (side == OrderSide::Buy) ? bid_prices[i] : ask_prices[i];
+            
+            book.addLimitOrder(i + 1, side, 100, price);
+        }
+        
+        // Force the compiler to actually perform the memory writes
+        benchmark::ClobberMemory();
+    }
+    
+    // Tell Google Benchmark exactly how many operations we performed 
+    // so it can accurately calculate the nanoseconds-per-order.
+    state.SetItemsProcessed(state.iterations() * numOrders);
+}
+
+// We will test this with 10,000 orders, 100,000 orders, and 1,000,000 orders.
+BENCHMARK(BM_WorstCaseCacheMiss)
+    ->RangeMultiplier(10)->Range(10000, 1000000) 
+    ->Unit(benchmark::kNanosecond)
+    ->ComputeStatistics("p99", p99_stat)
     ->ComputeStatistics("median", median_stat)
     ->DisplayAggregatesOnly(true);
 
