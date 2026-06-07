@@ -16,7 +16,6 @@ private:
     OrderSide buyOrSell;
     Quantity shares;
     Price limitPrice;
-    Price stopPrice;
 
     // --- INTRUSIVE LIST POINTERS ---
     // These replace std::list! They point to the poolIndex of the adjacent orders.
@@ -24,7 +23,7 @@ private:
     poolIndex prevOrder;
     
 public:
-    Order(ID _idNumber, OrderType _type, OrderSide _buyOrSell, Quantity _shares, Price _limitPrice, Price _stopPrice = 0);
+    Order(ID _idNumber, OrderType _type, OrderSide _buyOrSell, Quantity _shares, Price _limitPrice);
     ~Order() = default;
 
     // Getters
@@ -33,7 +32,6 @@ public:
     OrderSide getBuyOrSell() const;
     Price getLimitPrice() const;
     OrderType getType() const;
-    Price getStopPrice() const;
 
     // --- INTRUSIVE LIST GETTERS/SETTERS ---
     poolIndex getNextOrder() const;

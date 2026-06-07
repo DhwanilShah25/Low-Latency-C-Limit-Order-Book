@@ -14,12 +14,9 @@ void Book::reset() {
     // Clear FlatMaps (erase all set bits and optionals)
     for (auto it = bids.begin(); it != bids.end(); ) it = bids.erase(it);
     for (auto it = asks.begin(); it != asks.end(); ) it = asks.erase(it);
-    for (auto it = stopBids.begin(); it != stopBids.end(); ) it = stopBids.erase(it);
-    for (auto it = stopAsks.begin(); it != stopAsks.end(); ) it = stopAsks.erase(it);
 
     // Clear lookup maps
     orderMap.clear();
-    stopOrderMap.clear();
 
     // Reset pool free list without reallocating
     orderPool.reset();
@@ -159,11 +156,6 @@ void Book::addLimitOrder(ID orderId, OrderSide buyOrSell, Quantity shares, Price
             orderMap[orderId] = newOrderIndex;
         }
     }
-
-    // 3. Trigger Market Cascades if the market price moved
-    if (tradeOccurred) {
-        executeStopOrders(lastTradedPrice, buyOrSell);
-    }
 }
 
 void Book::cancelLimitOrder(ID orderId) {
@@ -282,8 +274,6 @@ void Book::modifyLimitOrder(ID orderId, Quantity newShares, Price newLimitPrice)
 void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
     Quantity remainingShares = shares;
 
-    // Need to check lastTradedPrice to Awaken stop orders!
-    Price lastTradedPrice = 0;     
     bool tradeOccurred = false;   
 
     // std::cout << "\n[EXCHANGE] Processing Market " << (buyOrSell == OrderSide::Buy ? "BUY" : "SELL") 
@@ -309,8 +299,6 @@ void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
                     // std::cout << "   -> Filled " << remainingShares << " shares @ " 
                     //           << currentLimit.getLimitPrice() << " (Order " << restingOrder.getOrderId() << " partially filled)\n";
                     
-                    //Update lastTradedPrice
-                    lastTradedPrice = currentLimit.getLimitPrice();
                     tradeOccurred = true;
 
                     remainingShares = 0;
@@ -320,8 +308,6 @@ void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
                     // std::cout << "   -> Filled " << restingShares << " shares @ " 
                     //           << currentLimit.getLimitPrice() << " (Order " << restingOrder.getOrderId() << " fully filled)\n";
                     
-                    //Update lastTradedPrice
-                    lastTradedPrice = currentLimit.getLimitPrice();
                     tradeOccurred = true;
 
                     remainingShares -= restingShares;
@@ -366,7 +352,6 @@ void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
                     //           << currentLimit.getLimitPrice() << " (Order " << restingOrder.getOrderId() << " partially filled)\n";
                     
                     //Update lastTradedPrice
-                    lastTradedPrice = currentLimit.getLimitPrice();
                     tradeOccurred = true;
 
                     remainingShares = 0;
@@ -375,8 +360,6 @@ void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
                     // std::cout << "   -> Filled " << restingShares << " shares @ " 
                     //           << currentLimit.getLimitPrice() << " (Order " << restingOrder.getOrderId() << " fully filled)\n";
                     
-                    //Update lastTradedPrice
-                    lastTradedPrice = currentLimit.getLimitPrice();
                     tradeOccurred = true;
 
                     remainingShares -= restingShares;
@@ -404,321 +387,6 @@ void Book::marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares) {
         // std::cout << "[WARNING] Market order " << orderId << " partially filled. " 
         //           << remainingShares << " shares remain unexecuted due to lack of liquidity.\n";
     }
-
-    // If we moved the market, check if we triggered any resting Stop Orders
-    if (tradeOccurred) {
-        executeStopOrders(lastTradedPrice, buyOrSell);
-    }
-}
-
-
-
-// --- Stop Orders API ---
-
-void Book::addStopOrder(ID orderId, OrderSide buyOrSell, Quantity shares, Price stopPrice) {
-    // 1. Prevent duplicate IDs across BOTH maps
-    if (stopOrderMap.find(orderId) != stopOrderMap.end() || orderMap.find(orderId) != orderMap.end()) {
-        // std::cerr << "Error: Order ID " << orderId << " already exists.\n";
-        return;
-    }
-
-    // 2. Construct directly into the pool and get the index
-    poolIndex newIdx = orderPool.construct(orderId, OrderType::Stop, buyOrSell, shares, 0, stopPrice);
-
-    // 3. Route to Stop Bids or Stop Asks
-    if (buyOrSell == OrderSide::Buy) {
-        // Stop Bids trigger when market price moves UP to or past the stopPrice
-        auto it = stopBids.find(stopPrice);
-        if (it == stopBids.end()) {
-            // First order! It is both the Head and the Tail.
-            stopBids[stopPrice] = {newIdx, newIdx};
-        } 
-        else {
-            // O(1) Insertion: Grab the Tail directly from the pair
-            poolIndex oldTail = it->second.second;
-            
-            // Wire the pointers together
-            orderPool.get(oldTail).setNextOrder(newIdx);
-            orderPool.get(newIdx).setPrevOrder(oldTail);
-            
-            // Update the map so the new order is the new Tail
-            it->second.second = newIdx; 
-        }
-    } 
-    else {
-        // Stop Asks trigger when market price moves DOWN to or past the stopPrice
-        auto it = stopAsks.find(stopPrice);
-        if (it == stopAsks.end()) {
-            stopAsks[stopPrice] = {newIdx, newIdx};
-        } 
-        else {
-            poolIndex oldTail = it->second.second;
-            
-            orderPool.get(oldTail).setNextOrder(newIdx);
-            orderPool.get(newIdx).setPrevOrder(oldTail);
-            
-            it->second.second = newIdx;
-        }
-    }
-    stopOrderMap[orderId] = newIdx;
-}
-
-void Book::cancelStopOrder(ID orderId) {
-    // 1. O(1) Lookup in the STOP map
-    auto mapIt = stopOrderMap.find(orderId);
-    if (mapIt == stopOrderMap.end()) {
-        // std::cerr << "Error: Cannot cancel. Stop Order ID " << orderId << " not found.\n";
-        return;
-    }
-
-    // 2. Extract details
-    // auto orderIdxIt = mapIt->second;
-
-    poolIndex deadIndex = mapIt->second;
-    Order &order = orderPool.get(deadIndex);
-
-    OrderSide side = order.getBuyOrSell();
-    Price stopPrice = order.getStopPrice();
-    poolIndex prevIdx = order.getPrevOrder();
-    poolIndex nextIdx = order.getNextOrder();
-
-
-    if (prevIdx != static_cast<poolIndex>(-1)) {
-        orderPool.get(prevIdx).setNextOrder(nextIdx);
-    }
-    if (nextIdx != static_cast<poolIndex>(-1)) {
-        orderPool.get(nextIdx).setPrevOrder(prevIdx);
-    }
-
-    // 3. Go to the correct map to erase it
-    if (side == OrderSide::Buy) {
-        auto levelIt = stopBids.find(stopPrice);
-
-        if (levelIt != stopBids.end()) {
-            
-            // If we deleted the Head, the Next order is the new Head
-            if (prevIdx == static_cast<poolIndex>(-1)) { 
-                levelIt->second.first = nextIdx;
-            }
-            // If we deleted the Tail, the Previous order is the new Tail
-            if (nextIdx == static_cast<poolIndex>(-1)) { 
-                levelIt->second.second = prevIdx;
-            }
-
-            // If the Head is now -1, the entire price level is empty. Clean it up!
-            if (levelIt->second.first == static_cast<poolIndex>(-1)) {
-                stopBids.erase(levelIt);
-            }
-        }
-
-    } 
-    else {
-        auto levelIt = stopAsks.find(stopPrice);
-        if (levelIt != stopAsks.end()) {
-            
-            if (prevIdx == static_cast<poolIndex>(-1)) {
-                levelIt->second.first = nextIdx;
-            }
-            if (nextIdx == static_cast<poolIndex>(-1)) {
-                levelIt->second.second = prevIdx;
-            }
-
-            if (levelIt->second.first == static_cast<poolIndex>(-1)) {
-                stopAsks.erase(levelIt);
-            }
-        }
-    }
-
-    // 4. Return memory to the pool and erase from the O(1) tracker
-    orderPool.destroy(deadIndex);
-    stopOrderMap.erase(orderId);
-}
-
-void Book::modifyStopOrder(ID orderId, Quantity newShares, Price newStopPrice) {
-    // Modifying a Stop Order changes its place in the trigger queue.
-    // Thus we first cancel it and then add a new order
-    auto mapIt = stopOrderMap.find(orderId);
-    if (mapIt == stopOrderMap.end()) {
-        // std::cerr << "Error: Cannot modify. Stop Order ID " << orderId << " not found.\n";
-        return;
-    }
-    poolIndex orderIdx = mapIt->second;
-    Order& order = orderPool.get(orderIdx);
-
-    OrderSide side = order.getBuyOrSell();
-    Price currentStopPrice = order.getStopPrice();
-    Quantity currentShares = order.getShares();
-
-    // WALL STREET RULE: If price is the same and size is shrinking, keep priority!
-    if (newStopPrice == currentStopPrice && newShares < currentShares) {
-        order.setShares(newShares);
-        // We don't need to update any totalVolume trackers because Stop levels don't have them.
-        return;
-    }
-
-    cancelStopOrder(orderId);
-    addStopOrder(orderId, side, newShares, newStopPrice);
-}
-
-// --- Internal Stop Logic ---
-
-void Book::executeStopOrders(Price currentMarketPrice, OrderSide side) {
-    // We must extract the orders first to prevent map iterator invalidation during recursion
-    std::vector<poolIndex> triggeredOrders;
-
-    if (side == OrderSide::Buy) {
-        // Market bought, price moved UP. 
-        auto it = stopBids.begin();
-        while (it != stopBids.end()) {
-            if (currentMarketPrice >= it->first) { // Trigger condition met
-                
-                // PHASE 2: Start at the Head of the Intrusive List! (it->second.first)
-                poolIndex currIdx = it->second.first;
-                
-                while (currIdx != static_cast<poolIndex>(-1)) {
-                    triggeredOrders.push_back(currIdx);
-
-                    Order &order = orderPool.get(currIdx);
-                    stopOrderMap.erase(order.getOrderId()); // Remove from O(1) tracker
-                    
-                    // Move to the next order in line
-                    currIdx = order.getNextOrder();
-                }
-                it = stopBids.erase(it); // Erase the price level and get next iterator
-            } else {
-                ++it;
-            }
-        }
-    } else {
-        // Market sold, price moved DOWN.
-        auto it = stopAsks.begin();
-        while (it != stopAsks.end()) {
-            if (currentMarketPrice <= it->first) { // Trigger condition met
-                
-                // PHASE 2: Start at the Head of the Intrusive List!
-                poolIndex currIdx = it->second.first;
-                
-                while (currIdx != static_cast<poolIndex>(-1)) {
-                    triggeredOrders.push_back(currIdx);
-
-                    Order &order = orderPool.get(currIdx);
-                    stopOrderMap.erase(order.getOrderId());
-                    
-                    currIdx = order.getNextOrder();
-                }
-                it = stopAsks.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-
-    // Now fire them into the live market!
-    for (const auto idx : triggeredOrders) {
-        Order& order = orderPool.get(idx);
-
-        // Extract EVERYTHING before destroying the memory
-        ID id = order.getOrderId();
-        OrderType type = order.getType();
-        OrderSide orderSide = order.getBuyOrSell();
-        Quantity shares = order.getShares();
-        Price limitPrice = order.getLimitPrice();
-
-        // Destroy the original Stop Order! Its job is done.
-        orderPool.destroy(idx);
-        
-        // FIX: Use the extracted 'type' variable instead of asking the destroyed 'order'
-        if (type == OrderType::Stop) {
-            marketOrder(id, orderSide, shares);
-        } 
-        else if (type == OrderType::StopLimit) {
-            addLimitOrder(id, orderSide, shares, limitPrice);
-        }
-    }
-}
-
-
-// --- Stop Limit Orders API ---
-
-void Book::addStopLimitOrder(ID orderId, OrderSide buyOrSell, Quantity shares, Price limitPrice, Price stopPrice) {
-    // 1. Prevent duplicate IDs across BOTH maps
-    if (stopOrderMap.find(orderId) != stopOrderMap.end() || orderMap.find(orderId) != orderMap.end()) {
-        // std::cerr << "Error: Order ID " << orderId << " already exists.\n";
-        return;
-    }
-
-    // 2. Construct directly into the pool and get the index
-    poolIndex newIdx = orderPool.construct(orderId, OrderType::StopLimit, buyOrSell, shares, limitPrice, stopPrice);
-
-    // 3. Route to Stop Bids or Stop Asks
-    if (buyOrSell == OrderSide::Buy) {
-        // Stop Bids trigger when market price moves UP to or past the stopPrice
-        auto it = stopBids.find(stopPrice);
-        if (it == stopBids.end()) {
-            // First order! It is both the Head and the Tail.
-            stopBids[stopPrice] = {newIdx, newIdx};
-        } 
-        else {
-            // O(1) Insertion: Grab the Tail directly from the pair
-            poolIndex oldTail = it->second.second;
-            
-            // Wire the pointers together
-            orderPool.get(oldTail).setNextOrder(newIdx);
-            orderPool.get(newIdx).setPrevOrder(oldTail);
-            
-            // Update the map so the new order is the new Tail
-            it->second.second = newIdx; 
-        }
-    } 
-    else {
-        // Stop Asks trigger when market price moves DOWN to or past the stopPrice
-        auto it = stopAsks.find(stopPrice);
-        if (it == stopAsks.end()) {
-            stopAsks[stopPrice] = {newIdx, newIdx};
-        } 
-        else {
-            poolIndex oldTail = it->second.second;
-            
-            orderPool.get(oldTail).setNextOrder(newIdx);
-            orderPool.get(newIdx).setPrevOrder(oldTail);
-            
-            it->second.second = newIdx;
-        }
-    }
-    stopOrderMap[orderId] = newIdx;
-}
-
-
-void Book::cancelStopLimitOrder(ID orderId) {
-    // Stop and StopLimit orders share the exact same data structure, so we reuse the logic
-    cancelStopOrder(orderId);
-}
-
-void Book::modifyStopLimitOrder(ID orderId, Quantity newShares, Price newLimitPrice, Price newStopPrice) {
-    auto mapIt = stopOrderMap.find(orderId);
-    if (mapIt == stopOrderMap.end()) {
-        // std::cerr << "Error: Cannot modify. Stop Limit Order ID " << orderId << " not found.\n";
-        return;
-    }
-
-    poolIndex orderIdx = mapIt->second;
-    Order& order = orderPool.get(orderIdx);
-
-    OrderSide side = order.getBuyOrSell();
-    Price currentStopPrice = order.getStopPrice();
-    Quantity currentShares = order.getShares();
-    Price limitPrice = order.getLimitPrice();
-    // WALL STREET RULE: If price is the same and size is shrinking, keep priority!
-    if (newStopPrice == currentStopPrice && newLimitPrice == limitPrice && newShares < currentShares) {
-        order.setShares(newShares);
-        // We don't need to update any totalVolume trackers because Stop levels don't have them.
-        return;
-    }
-
-    // Enforce Time Priority rules by canceling and replacing
-    cancelStopLimitOrder(orderId);
-    addStopLimitOrder(orderId, side, newShares, newLimitPrice, newStopPrice);
-
 }
 
 

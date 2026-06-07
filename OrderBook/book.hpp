@@ -34,17 +34,8 @@ private:
     // ID pointing mapped to the Pointer of that order in the order list at particular limit level
     // For O(1) ORDER LOOKUP 
     std::unordered_map<ID, poolIndex> orderMap;
-    // For O(1) STOP ORDER LOOKUP
-    std::unordered_map<ID, poolIndex> stopOrderMap;
-
-    // Stop Order Maps
-    FlatMap<std::pair<poolIndex, poolIndex>, true> stopBids;
-    FlatMap<std::pair<poolIndex, poolIndex>, false> stopAsks;
-    // std::map<Price, std::pair<poolIndex, poolIndex>, std::greater<Price>> stopBids;
-    // std::map<Price, std::pair<poolIndex, poolIndex>> stopAsks;
 
     // Private Engine Helpers
-    void executeStopOrders(Price currentMarketPrice, OrderSide side);
     void deleteFromOrderMap(ID orderId);
 
 public:
@@ -56,16 +47,6 @@ public:
     void cancelLimitOrder(ID orderId);
     void modifyLimitOrder(ID orderId, Quantity newShares, Price newLimitPrice);
     void marketOrder(ID orderId, OrderSide buyOrSell, Quantity shares);
-
-    // Stop Orders API
-    void addStopOrder(ID orderId, OrderSide buyOrSell, Quantity shares, Price stopPrice);
-    void cancelStopOrder(ID orderId);
-    void modifyStopOrder(ID orderId, Quantity newShares, Price newStopPrice);
-
-    // Stop Limit Orders API
-    void addStopLimitOrder(ID orderId, OrderSide buyOrSell, Quantity shares, Price limitPrice, Price stopPrice);
-    void cancelStopLimitOrder(ID orderId);
-    void modifyStopLimitOrder(ID orderId, Quantity newShares, Price newLimitPrice, Price newStopPrice);
 
     // Visualisation
     void printLimit(Price limitPrice, OrderSide buyOrSell) const;

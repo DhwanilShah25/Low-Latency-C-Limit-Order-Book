@@ -2,8 +2,8 @@
 #include <iostream>
 
 // Constructor
-Order::Order(ID _idNumber, OrderType _type, OrderSide _buyOrSell, Quantity _shares, Price _limitPrice, Price _stopPrice)
-    : idNumber(_idNumber), type(_type), buyOrSell(_buyOrSell), shares(_shares), limitPrice(_limitPrice), stopPrice(_stopPrice),
+Order::Order(ID _idNumber, OrderType _type, OrderSide _buyOrSell, Quantity _shares, Price _limitPrice)
+    : idNumber(_idNumber), type(_type), buyOrSell(_buyOrSell), shares(_shares), limitPrice(_limitPrice),
     nextOrder(static_cast<poolIndex>(-1)), prevOrder(static_cast<poolIndex>(-1)) {
 }
 
@@ -13,7 +13,6 @@ ID Order::getOrderId() const { return idNumber; }
 OrderSide Order::getBuyOrSell() const { return buyOrSell; }
 Price Order::getLimitPrice() const { return limitPrice; } 
 OrderType Order::getType() const { return type; }       
-Price Order::getStopPrice() const { return stopPrice; }
 
 // --- Modifiers ---
 void Order::fill(Quantity executedShares) {

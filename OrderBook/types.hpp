@@ -19,9 +19,7 @@ enum class OrderSide : uint8_t {
 
 enum class OrderType : uint8_t {
     Limit,
-    Market,
-    Stop,
-    StopLimit
+    Market
 };
 
 using ID = uint64_t;

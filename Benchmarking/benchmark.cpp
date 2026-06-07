@@ -1,5 +1,5 @@
 #include <benchmark/benchmark.h>
-#include "book.hpp" // CMake knows to look in OrderBook/
+#include "../OrderBook/book.hpp" // CMake knows to look in OrderBook/
 #include <vector>
 #include <algorithm>
 #include <random>
